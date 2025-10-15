@@ -1,0 +1,39 @@
+---
+- name: Upload EC2 key pair to AWS
+  hosts: localhost
+  connection: local
+  vars:
+    aws_profile: "interview"                 # <- the profile you just created
+    aws_region:  "us-east-1"
+    iam_username: "rajendra"        # <- set once here
+    key_name: "interview-terraform-{{ iam_username }}"
+    pubkey_path: "{{ lookup('env','HOME') }}/.ssh/interview-terraform-{{ iam_username }}.pub"
+  collections:
+    - amazon.aws
+
+  tasks:
+    - name: Ensure public key file exists
+      ansible.builtin.stat:
+        path: "{{ pubkey_path }}"
+      register: kstat
+      failed_when: not kstat.stat.exists
+
+    - name: Read public key
+      ansible.builtin.slurp:
+        src: "{{ pubkey_path }}"
+      register: pub_raw
+
+    - name: Upload (create/update) EC2 key pair
+      amazon.aws.ec2_key:
+        name: "{{ key_name }}"
+        key_material: "{{ pub_raw['content'] | b64decode }}"
+        region: "{{ aws_region }}"
+        profile: "{{ aws_profile }}"
+        tags:
+          Name: "{{ key_name }}"
+      register: key_result
+
+    - name: Show result
+      ansible.builtin.debug:
+        var: key_result
+
