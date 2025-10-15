@@ -32,7 +32,8 @@ variable "subnet_id" {
       "subnet-05352ec468237a915",
       "subnet-0638273ad81d337ae",
       "subnet-0e6fca8b7cc1ed83e",
-      "subnet-06b729959a9886c9d"
+      "subnet-06b729959a9886c9d",
+      "subnet-08e3f7bca5c38abe7"
     ], var.subnet_id)
     error_message = "subnet_id must be one of the allowed subnets from the exercise."
   }
